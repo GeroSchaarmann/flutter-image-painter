@@ -484,7 +484,8 @@ class ImagePainterState extends State<ImagePainter> {
           Expanded(
             child: FittedBox(
               alignment: FractionalOffset.center,
-              child: ClipRect(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
                 child: AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) {
@@ -561,12 +562,20 @@ class ImagePainterState extends State<ImagePainter> {
               IconButton(
                   tooltip: textDelegate.undo,
                   icon: widget.undoIcon ??
-                      Icon(Icons.reply, color: Colors.grey[700]),
+                      Icon(Icons.reply,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withOpacity(1)),
                   onPressed: () => _controller.undo()),
               IconButton(
                 tooltip: textDelegate.clearAllProgress,
                 icon: widget.clearAllIcon ??
-                    Icon(Icons.clear, color: Colors.grey[700]),
+                    Icon(Icons.clear,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withOpacity(1)),
                 onPressed: () => _controller.clear(),
               ),
             ],
@@ -783,70 +792,123 @@ class ImagePainterState extends State<ImagePainter> {
   Widget _buildControls() {
     return Container(
       padding: const EdgeInsets.all(4),
-      color: Colors.grey[200],
       child: Row(
         children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              final icon = paintModes(textDelegate)
-                  .firstWhere((item) => item.mode == _controller.mode)
-                  .icon;
-              return PopupMenuButton(
-                tooltip: textDelegate.changeMode,
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                icon: Icon(icon, color: Colors.grey[700]),
-                itemBuilder: (_) => [_showOptionsRow()],
-              );
+          IconButton(
+            splashRadius: 24,
+            tooltip: textDelegate.undo,
+            icon: Icon(
+              Icons.zoom_out_map,
+              color: _controller.mode == PaintMode.none
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surface,
+            ),
+            onPressed: () {
+              if (widget.onPaintModeChanged != null) {
+                widget.onPaintModeChanged!(PaintMode.none);
+              }
+              setState(() {
+                _controller.setMode(PaintMode.none);
+              });
             },
           ),
+          IconButton(
+            splashRadius: 24,
+            tooltip: textDelegate.drawing,
+            icon: Icon(
+              Icons.edit,
+              color: _controller.mode == PaintMode.freeStyle
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surface,
+            ),
+            onPressed: () {
+              if (widget.onPaintModeChanged != null) {
+                widget.onPaintModeChanged!(PaintMode.freeStyle);
+              }
+              setState(() {
+                _controller.setMode(PaintMode.freeStyle);
+              });
+            },
+          ),
+          // all actions
+          // AnimatedBuilder(
+          //   animation: _controller,
+          //   builder: (_, __) {
+          //     final icon = paintModes(textDelegate)
+          //         .firstWhere((item) => item.mode == _controller.mode)
+          //         .icon;
+          //     return PopupMenuButton(
+          //       splashRadius: 24,
+          //       tooltip: textDelegate.changeMode,
+          //       shape: ContinuousRectangleBorder(
+          //         borderRadius: BorderRadius.circular(40),
+          //       ),
+          //       icon: Icon(icon, color: Theme.of(context).colorScheme.surface.withOpacity(1)),
+          //       itemBuilder: (_) => [_showOptionsRow()],
+          //     );
+          //   },
+          // ),
           AnimatedBuilder(
             animation: _controller,
             builder: (_, __) {
               return PopupMenuButton(
+                splashRadius: 24,
+                color: Theme.of(context).disabledColor,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 shape: ContinuousRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 tooltip: textDelegate.changeColor,
-                icon: widget.colorIcon ??
-                    Container(
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey),
-                        color: _controller.color,
-                      ),
-                    ),
+                icon: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: widget.colorIcon ??
+                        Container(
+                          padding: const EdgeInsets.all(2.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Theme.of(context).colorScheme.surface),
+                            color: _controller.color,
+                          ),
+                        )),
                 itemBuilder: (_) => [_showColorPicker()],
               );
             },
           ),
+          //brush size
           PopupMenuButton(
+            splashRadius: 24,
             tooltip: textDelegate.changeBrushSize,
+            color: Theme.of(context).disabledColor,
             shape: ContinuousRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
-            icon:
-                widget.brushIcon ?? Icon(Icons.brush, color: Colors.grey[700]),
+            icon: widget.brushIcon ??
+                Icon(Icons.brush,
+                    color:
+                        Theme.of(context).colorScheme.surface.withOpacity(1)),
             itemBuilder: (_) => [_showRangeSlider()],
           ),
-          IconButton(
-              icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
+          //write text
+          // IconButton(
+          //     icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
           const Spacer(),
           IconButton(
+            splashRadius: 24,
             tooltip: textDelegate.undo,
-            icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
+            icon: widget.undoIcon ??
+                Icon(Icons.reply,
+                    color:
+                        Theme.of(context).colorScheme.surface.withOpacity(1)),
             onPressed: () => _controller.undo(),
           ),
-          IconButton(
-            tooltip: textDelegate.clearAllProgress,
-            icon: widget.clearAllIcon ??
-                Icon(Icons.clear, color: Colors.grey[700]),
-            onPressed: () => _controller.clear(),
-          ),
+          //clear button
+          // IconButton(
+          //   tooltip: textDelegate.clearAllProgress,
+          //   icon: widget.clearAllIcon ??
+          //       Icon(Icons.clear, color: Theme.of(context).colorScheme.surface.withOpacity(1)),
+          //   onPressed: () => _controller.clear(),
+          // ),
         ],
       ),
     );

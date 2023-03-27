@@ -512,12 +512,14 @@ class ImagePainterState extends State<ImagePainter> {
   ///paints image on given constrains for drawing if image is not null.
   Widget _paintImage() {
     return Scaffold(
+      appBar: AppBar(
+        title: _buildTopRow(),
+      ),
       bottomNavigationBar: _buildControls(),
       body: Stack(
         children: [
           Column(
             children: [
-              _buildTopRow(),
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -950,6 +952,7 @@ class ImagePainterState extends State<ImagePainter> {
               child: BottomBox(
                 label: textDelegate.changeBrushSize,
                 child: Icon(Icons.brush,
+                    size: 20,
                     color:
                         Theme.of(context).colorScheme.surface.withOpacity(1)),
               ),
@@ -988,10 +991,8 @@ class BottomBox extends StatelessWidget {
           const SizedBox(
             height: 12,
           ),
-          child,
-          const SizedBox(
-            height: 4,
-          ),
+          Center(child: Container(height: 20, child: child)),
+          Spacer(),
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(

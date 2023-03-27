@@ -114,7 +114,8 @@ class _ImagePainterExampleState extends State<ImagePainterExample> {
       ),
       body: SafeArea(
         child: ImagePainter.asset(
-          "assets/test.png",
+          "assets/trest2.png",
+          closeWidget: Icon(Icons.close),
           key: _imageKey,
           scalable: true,
           controlsAtTop: true,
@@ -132,6 +133,14 @@ class _ImagePainterExampleState extends State<ImagePainterExample> {
           ],
           initialColor: const Color(0xFF0C6F4B),
           initialPaintMode: PaintMode.none,
+          onSave: (p0) async {
+            final String path = (await getApplicationDocumentsDirectory()).path;
+            var newFile = await File(path + "/testi2.png").writeAsBytes(p0);
+
+            print("yesss");
+            print(newFile.path);
+// copy the file to a new path
+          },
         ),
       ),
     );

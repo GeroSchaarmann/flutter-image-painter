@@ -5,10 +5,10 @@ class DutchTextDelegate implements TextDelegate {
   String get arrow => "Pfeil";
 
   @override
-  String get changeBrushSize => "Stiftdicke ändern";
+  String get changeBrushSize => "Stiftdicke";
 
   @override
-  String get changeColor => "Farbe ändern";
+  String get changeColor => "Farbe";
 
   @override
   String get changeMode => "Modus ändern";

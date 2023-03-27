@@ -511,14 +511,13 @@ class ImagePainterState extends State<ImagePainter> {
 
   ///paints image on given constrains for drawing if image is not null.
   Widget _paintImage() {
-    return Container(
-      height: widget.height ?? double.maxFinite,
-      width: widget.width ?? double.maxFinite,
-      child: Stack(
+    return Scaffold(
+      bottomNavigationBar: _buildControls(),
+      body: Stack(
         children: [
           Column(
             children: [
-              if (widget.controlsAtTop) _buildControls(),
+              _buildTopRow(),
               Expanded(
                 child: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -554,8 +553,6 @@ class ImagePainterState extends State<ImagePainter> {
                   ),
                 ),
               ),
-              if (!widget.controlsAtTop) _buildControls(),
-              SizedBox(height: MediaQuery.of(context).padding.bottom)
             ],
           ),
           if (isLoading)
@@ -845,161 +842,203 @@ class ImagePainterState extends State<ImagePainter> {
   //     },
   //   );
   // }
+  Widget _buildTopRow() {
+    return Container(
+      padding: const EdgeInsets.only(top: 4, bottom: 4),
+      child: Row(
+        children: [
+          widget.closeWidget,
+          const Spacer(),
+          IconButton(
+            splashRadius: 20,
+            tooltip: textDelegate.save,
+            icon: Icon(Icons.save_outlined,
+                color: Theme.of(context).colorScheme.surface.withOpacity(1)),
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
+              if (widget.onSave != null) {
+                var exportedImage = await exportImage();
+                if (exportedImage != null) {
+                  await widget.onSave!(exportedImage);
+                }
+              }
+              setState(() {
+                isLoading = false;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildControls() {
     return Container(
-      padding: const EdgeInsets.only(top: 4, bottom: 4),
-      child: Container(
-        height: 44,
-        child: Row(
-          children: [
-            Expanded(
-              child: ListView(scrollDirection: Axis.horizontal, children: [
-                IconButton(
-                  splashRadius: 20,
-                  tooltip: textDelegate.noneZoom,
-                  icon: Icon(
-                    Icons.zoom_out_map,
-                    color: _controller.mode == PaintMode.none
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.surface,
-                  ),
-                  onPressed: () {
-                    if (widget.onPaintModeChanged != null) {
-                      widget.onPaintModeChanged!(PaintMode.none);
-                    }
-                    setState(() {
-                      _controller.setMode(PaintMode.none);
-                    });
-                  },
-                ),
-
-                IconButton(
-                  splashRadius: 20,
-                  tooltip: textDelegate.drawing,
-                  icon: Icon(
-                    Icons.edit,
-                    color: _controller.mode == PaintMode.freeStyle
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.surface,
-                  ),
-                  onPressed: () {
-                    if (widget.onPaintModeChanged != null) {
-                      widget.onPaintModeChanged!(PaintMode.freeStyle);
-                    }
-                    setState(() {
-                      _controller.setMode(PaintMode.freeStyle);
-                    });
-                  },
-                ),
-                // all actions
-                // AnimatedBuilder(
-                //   animation: _controller,
-                //   builder: (_, __) {
-                //     final icon = paintModes(textDelegate)
-                //         .firstWhere((item) => item.mode == _controller.mode)
-                //         .icon;
-                //     return PopupMenuButton(
-                //       splashRadius: 20,
-                //       tooltip: textDelegate.changeMode,
-                //       shape: ContinuousRectangleBorder(
-                //         borderRadius: BorderRadius.circular(40),
-                //       ),
-                //       icon: Icon(icon, color: Theme.of(context).colorScheme.surface.withOpacity(1)),
-                //       itemBuilder: (_) => [_showOptionsRow()],
-                //     );
-                //   },
-                // ),
-
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (_, __) {
-                    return PopupMenuButton(
-                      splashRadius: 20,
-                      color: Theme.of(context).disabledColor,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: ContinuousRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      tooltip: textDelegate.changeColor,
-                      icon: Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: widget.colorIcon ??
-                              Container(
-                                padding: const EdgeInsets.all(2.0),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surface),
-                                  color: _controller.color,
-                                ),
-                              )),
-                      itemBuilder: (_) => [_showColorPicker()],
-                    );
-                  },
-                ),
-                //brush size
-                PopupMenuButton(
-                  splashRadius: 20,
-                  tooltip: textDelegate.changeBrushSize,
+      height: MediaQuery.of(context).padding.bottom + 54,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          BottomActionBox(
+            label: textDelegate.noneZoom,
+            isActive: _controller.mode == PaintMode.none,
+            iconData: Icons.zoom_out_map,
+            action: () {
+              if (widget.onPaintModeChanged != null) {
+                widget.onPaintModeChanged!(PaintMode.none);
+              }
+              setState(() {
+                _controller.setMode(PaintMode.none);
+              });
+            },
+          ),
+          BottomActionBox(
+            label: textDelegate.drawing,
+            isActive: _controller.mode == PaintMode.freeStyle,
+            iconData: Icons.edit,
+            action: () {
+              if (widget.onPaintModeChanged != null) {
+                widget.onPaintModeChanged!(PaintMode.freeStyle);
+              }
+              setState(() {
+                _controller.setMode(PaintMode.freeStyle);
+              });
+            },
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (_, __) {
+                return PopupMenuButton(
+                  splashRadius: 2,
                   color: Theme.of(context).disabledColor,
+                  padding: const EdgeInsets.all(0),
                   shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(0),
                   ),
-                  icon: widget.brushIcon ??
-                      Icon(Icons.brush,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surface
-                              .withOpacity(1)),
-                  itemBuilder: (_) => [_showRangeSlider()],
-                ),
-                //write text
-                // IconButton(
-                //     icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
-                IconButton(
-                  splashRadius: 20,
-                  tooltip: textDelegate.undo,
-                  icon: widget.undoIcon ??
-                      Icon(Icons.reply,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surface
-                              .withOpacity(1)),
-                  onPressed: () => _controller.undo(),
-                ),
-                IconButton(
-                  splashRadius: 20,
-                  tooltip: textDelegate.save,
-                  icon: Icon(Icons.save_outlined,
-                      color:
-                          Theme.of(context).colorScheme.surface.withOpacity(1)),
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    if (widget.onSave != null) {
-                      var exportedImage = await exportImage();
-                      if (exportedImage != null) {
-                        await widget.onSave!(exportedImage);
-                      }
-                    }
-                    setState(() {
-                      isLoading = false;
-                    });
-                  },
-                ),
-              ]),
+                  child: BottomBox(
+                    label: textDelegate.changeColor,
+                    isActive: false,
+                    child: Container(
+                      padding: const EdgeInsets.all(7.0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.surface,
+                        ),
+                        color: _controller.color,
+                      ),
+                    ),
+                  ),
+                  itemBuilder: (_) => [_showColorPicker()],
+                );
+              },
             ),
-            const SizedBox(
-              width: 20,
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            child: PopupMenuButton(
+              splashRadius: 20,
+              tooltip: textDelegate.changeBrushSize,
+              color: Theme.of(context).disabledColor,
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: BottomBox(
+                label: textDelegate.changeBrushSize,
+                child: Icon(Icons.brush,
+                    color:
+                        Theme.of(context).colorScheme.surface.withOpacity(1)),
+              ),
+              itemBuilder: (_) => [_showRangeSlider()],
             ),
-            widget.closeWidget
-          ],
-        ),
+          ),
+          BottomActionBox(
+            label: textDelegate.undo,
+            iconData: Icons.reply,
+            action: () => _controller.undo(),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class BottomBox extends StatelessWidget {
+  final Widget child;
+  final String label;
+  final bool isActive;
+  const BottomBox({
+    Key? key,
+    required this.child,
+    required this.label,
+    this.isActive = false,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Theme.of(context).primaryColorDark,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 12,
+          ),
+          child,
+          const SizedBox(
+            height: 4,
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.surface,
+                ),
+            maxLines: 1,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom)
+        ],
+      ),
+    );
+  }
+}
+
+class BottomActionBox extends StatelessWidget {
+  final IconData iconData;
+  final String label;
+  final bool isActive;
+  final Function action;
+  const BottomActionBox(
+      {Key? key,
+      required this.iconData,
+      required this.label,
+      this.isActive = false,
+      required this.action})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+        fit: FlexFit.tight,
+        child: GestureDetector(
+          onTap: () => action(),
+          child: BottomBox(
+            label: label,
+            isActive: isActive,
+            child: Icon(
+              iconData,
+              size: 20,
+              color: isActive
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surface,
+            ),
+          ),
+        ));
   }
 }

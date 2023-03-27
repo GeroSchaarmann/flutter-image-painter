@@ -10,9 +10,7 @@ import '_controller.dart';
 import '_image_painter.dart';
 import 'delegates/text_delegate.dart';
 import 'widgets/_color_widget.dart';
-import 'widgets/_mode_widget.dart';
 import 'widgets/_range_slider.dart';
-import 'widgets/_text_dialog.dart';
 
 export '_image_painter.dart';
 
@@ -43,6 +41,7 @@ class ImagePainter extends StatefulWidget {
     this.onColorChanged,
     this.onStrokeWidthChanged,
     this.onPaintModeChanged,
+    this.onSave,
     this.textDelegate,
   }) : super(key: key);
 
@@ -67,6 +66,7 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<double>? onStrokeWidthChanged,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
+    Function(Uint8List)? onSave,
   }) {
     return ImagePainter._(
       key: key,
@@ -88,6 +88,7 @@ class ImagePainter extends StatefulWidget {
       onStrokeWidthChanged: onStrokeWidthChanged,
       textDelegate: textDelegate,
       controlsAtTop: controlsAtTop ?? true,
+      onSave: onSave,
     );
   }
 
@@ -112,28 +113,29 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<double>? onStrokeWidthChanged,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
+    Function(Uint8List)? onSave,
   }) {
     return ImagePainter._(
-      key: key,
-      assetPath: path,
-      height: height,
-      width: width,
-      isScalable: scalable ?? false,
-      placeHolder: placeholderWidget,
-      colors: colors,
-      brushIcon: brushIcon,
-      undoIcon: undoIcon,
-      colorIcon: colorIcon,
-      clearAllIcon: clearAllIcon,
-      initialPaintMode: initialPaintMode,
-      initialColor: initialColor,
-      initialStrokeWidth: initialStrokeWidth,
-      onPaintModeChanged: onPaintModeChanged,
-      onColorChanged: onColorChanged,
-      onStrokeWidthChanged: onStrokeWidthChanged,
-      textDelegate: textDelegate,
-      controlsAtTop: controlsAtTop ?? true,
-    );
+        key: key,
+        assetPath: path,
+        height: height,
+        width: width,
+        isScalable: scalable ?? false,
+        placeHolder: placeholderWidget,
+        colors: colors,
+        brushIcon: brushIcon,
+        undoIcon: undoIcon,
+        colorIcon: colorIcon,
+        clearAllIcon: clearAllIcon,
+        initialPaintMode: initialPaintMode,
+        initialColor: initialColor,
+        initialStrokeWidth: initialStrokeWidth,
+        onPaintModeChanged: onPaintModeChanged,
+        onColorChanged: onColorChanged,
+        onStrokeWidthChanged: onStrokeWidthChanged,
+        textDelegate: textDelegate,
+        controlsAtTop: controlsAtTop ?? true,
+        onSave: onSave);
   }
 
   ///Constructor for loading image from [File].
@@ -157,6 +159,7 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<double>? onStrokeWidthChanged,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
+    Function(Uint8List)? onSave,
   }) {
     return ImagePainter._(
       key: key,
@@ -178,6 +181,7 @@ class ImagePainter extends StatefulWidget {
       onStrokeWidthChanged: onStrokeWidthChanged,
       textDelegate: textDelegate,
       controlsAtTop: controlsAtTop ?? true,
+      onSave: onSave,
     );
   }
 
@@ -202,6 +206,7 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<double>? onStrokeWidthChanged,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
+    Function(Uint8List)? onSave,
   }) {
     return ImagePainter._(
       key: key,
@@ -223,6 +228,7 @@ class ImagePainter extends StatefulWidget {
       onStrokeWidthChanged: onStrokeWidthChanged,
       textDelegate: textDelegate,
       controlsAtTop: controlsAtTop ?? true,
+      onSave: onSave,
     );
   }
 
@@ -242,6 +248,7 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<double>? onStrokeWidthChanged,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
+    Function(Uint8List)? onSave,
   }) {
     return ImagePainter._(
       key: key,
@@ -260,6 +267,7 @@ class ImagePainter extends StatefulWidget {
       onStrokeWidthChanged: onStrokeWidthChanged,
       textDelegate: textDelegate,
       controlsAtTop: controlsAtTop ?? true,
+      onSave: onSave,
     );
   }
 
@@ -330,6 +338,8 @@ class ImagePainter extends StatefulWidget {
 
   //the text delegate
   final TextDelegate? textDelegate;
+
+  final Function(Uint8List)? onSave;
 
   @override
   ImagePainterState createState() => ImagePainterState();
@@ -658,33 +668,33 @@ class ImagePainterState extends State<ImagePainter> {
         .toImage(size.width.floor(), size.height.floor());
   }
 
-  PopupMenuItem _showOptionsRow() {
-    return PopupMenuItem(
-      enabled: false,
-      child: Center(
-        child: SizedBox(
-          child: Wrap(
-            children: paintModes(textDelegate)
-                .map(
-                  (item) => SelectionItems(
-                    data: item,
-                    isSelected: _controller.mode == item.mode,
-                    onTap: () {
-                      if (widget.onPaintModeChanged != null &&
-                          item.mode != null) {
-                        widget.onPaintModeChanged!(item.mode!);
-                      }
-                      _controller.setMode(item.mode!);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-      ),
-    );
-  }
+  // PopupMenuItem _showOptionsRow() {
+  //   return PopupMenuItem(
+  //     enabled: false,
+  //     child: Center(
+  //       child: SizedBox(
+  //         child: Wrap(
+  //           children: paintModes(textDelegate)
+  //               .map(
+  //                 (item) => SelectionItems(
+  //                   data: item,
+  //                   isSelected: _controller.mode == item.mode,
+  //                   onTap: () {
+  //                     if (widget.onPaintModeChanged != null &&
+  //                         item.mode != null) {
+  //                       widget.onPaintModeChanged!(item.mode!);
+  //                     }
+  //                     _controller.setMode(item.mode!);
+  //                     Navigator.of(context).pop();
+  //                   },
+  //                 ),
+  //               )
+  //               .toList(),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   PopupMenuItem _showRangeSlider() {
     return PopupMenuItem(
@@ -758,36 +768,36 @@ class ImagePainterState extends State<ImagePainter> {
     }
   }
 
-  void _openTextDialog() {
-    _controller.setMode(PaintMode.text);
-    final fontSize = 6 * _controller.strokeWidth;
+  // void _openTextDialog() {
+  //   _controller.setMode(PaintMode.text);
+  //   final fontSize = 6 * _controller.strokeWidth;
 
-    TextDialog.show(
-      context,
-      _textController,
-      fontSize,
-      _controller.color,
-      textDelegate,
-      onFinished: (context) {
-        if (_textController.text != '') {
-          setState(
-            () {
-              _addPaintHistory(
-                PaintInfo(
-                  mode: PaintMode.text,
-                  text: _textController.text,
-                  paint: _paint,
-                  offset: [],
-                ),
-              );
-            },
-          );
-          _textController.clear();
-        }
-        Navigator.of(context).pop();
-      },
-    );
-  }
+  //   TextDialog.show(
+  //     context,
+  //     _textController,
+  //     fontSize,
+  //     _controller.color,
+  //     textDelegate,
+  //     onFinished: (context) {
+  //       if (_textController.text != '') {
+  //         setState(
+  //           () {
+  //             _addPaintHistory(
+  //               PaintInfo(
+  //                 mode: PaintMode.text,
+  //                 text: _textController.text,
+  //                 paint: _paint,
+  //                 offset: [],
+  //               ),
+  //             );
+  //           },
+  //         );
+  //         _textController.clear();
+  //       }
+  //       Navigator.of(context).pop();
+  //     },
+  //   );
+  // }
 
   Widget _buildControls() {
     return Container(
@@ -796,7 +806,7 @@ class ImagePainterState extends State<ImagePainter> {
         children: [
           IconButton(
             splashRadius: 24,
-            tooltip: textDelegate.undo,
+            tooltip: textDelegate.noneZoom,
             icon: Icon(
               Icons.zoom_out_map,
               color: _controller.mode == PaintMode.none
@@ -902,13 +912,21 @@ class ImagePainterState extends State<ImagePainter> {
                         Theme.of(context).colorScheme.surface.withOpacity(1)),
             onPressed: () => _controller.undo(),
           ),
-          //clear button
-          // IconButton(
-          //   tooltip: textDelegate.clearAllProgress,
-          //   icon: widget.clearAllIcon ??
-          //       Icon(Icons.clear, color: Theme.of(context).colorScheme.surface.withOpacity(1)),
-          //   onPressed: () => _controller.clear(),
-          // ),
+
+          IconButton(
+            splashRadius: 24,
+            tooltip: textDelegate.save,
+            icon: Icon(Icons.save_outlined,
+                color: Theme.of(context).colorScheme.surface.withOpacity(1)),
+            onPressed: () async {
+              if (widget.onSave != null) {
+                var exportedImage = await exportImage();
+                if (exportedImage != null) {
+                  widget.onSave!(exportedImage);
+                }
+              }
+            },
+          ),
         ],
       ),
     );

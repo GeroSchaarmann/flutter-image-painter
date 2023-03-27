@@ -42,4 +42,6 @@ class DutchTextDelegate implements TextDelegate {
 
   @override
   String get undo => "Zurücksetzen";
+  @override
+  String get save => "Speichern";
 }

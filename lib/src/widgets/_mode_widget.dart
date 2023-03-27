@@ -25,10 +25,10 @@ class SelectionItems extends StatelessWidget {
         ),
         title: Text(
           data!.label!,
-          style: Theme.of(context).textTheme.subtitle1!.copyWith(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
               color: isSelected!
                   ? Colors.white
-                  : Theme.of(context).textTheme.bodyText1!.color),
+                  : Theme.of(context).textTheme.bodyLarge!.color),
         ),
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),

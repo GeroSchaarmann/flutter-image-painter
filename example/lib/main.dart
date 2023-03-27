@@ -17,11 +17,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Image Painter Example',
       theme: ThemeData(
-          scaffoldBackgroundColor: Color(0xFF1C1C1E),
-          disabledColor: Color(0xFF2B2B2D),
-          textTheme: TextTheme().apply(
-            bodyColor: Color(0xFFFFFFFF),
-            displayColor: Color(0xFFFFFFFF),
+          scaffoldBackgroundColor: const Color(0xFF1C1C1E),
+          disabledColor: const Color(0xFF2B2B2D),
+          textTheme: const TextTheme().apply(
+            bodyColor: const Color(0xFFFFFFFF),
+            displayColor: const Color(0xFFFFFFFF),
           ),
           dialogTheme: const DialogTheme(
             backgroundColor: Color(0xFF1C1C1E),
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
             onSurface: Color(0xFFFFFFFF),
             tertiary: Color(0xFF3A3A3C),
           )),
-      home: ImagePainterExample(),
+      home: const ImagePainterExample(),
     );
   }
 }
@@ -120,7 +120,7 @@ class _ImagePainterExampleState extends State<ImagePainterExample> {
           controlsAtTop: true,
           initialStrokeWidth: 4,
           textDelegate: DutchTextDelegate(),
-          colors: [
+          colors: const [
             Color(0xFF0C6F4B),
             Color(0xFFFF3B30),
             Color(0xFFFF3B31),
@@ -130,7 +130,7 @@ class _ImagePainterExampleState extends State<ImagePainterExample> {
             Color(0xFFFFFFFF),
             Color(0xFF1C1C1E),
           ],
-          initialColor: Color(0xFF0C6F4B),
+          initialColor: const Color(0xFF0C6F4B),
           initialPaintMode: PaintMode.none,
         ),
       ),

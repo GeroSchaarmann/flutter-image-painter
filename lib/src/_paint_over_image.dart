@@ -511,65 +511,74 @@ class ImagePainterState extends State<ImagePainter> {
 
   ///paints image on given constrains for drawing if image is not null.
   Widget _paintImage() {
+    var bottomPadding = MediaQuery.of(context).padding.bottom;
+    if (bottomPadding < 16) {
+      bottomPadding = 16;
+    }
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: _buildTopRow(),
       ),
-      bottomNavigationBar: _buildControls(),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                  child: InteractiveViewer(
-                    maxScale: 4,
-                    minScale: 1,
-                    child: FittedBox(
-                      alignment: FractionalOffset.center,
-                      child: AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return InteractiveViewer(
-                            transformationController: _transformationController,
-                            maxScale: 4,
-                            minScale: 1,
-                            panEnabled: _controller.mode == PaintMode.none,
-                            scaleEnabled: widget.isScalable!,
-                            onInteractionUpdate: _scaleUpdateGesture,
-                            onInteractionEnd: _scaleEndGesture,
-                            child: CustomPaint(
-                              size: imageSize,
-                              willChange: true,
-                              isComplex: true,
-                              painter: DrawImage(
-                                image: _image,
-                                controller: _controller,
+      bottomNavigationBar: _buildControls(bottomPadding),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                    child: InteractiveViewer(
+                      maxScale: 4,
+                      minScale: 1,
+                      child: FittedBox(
+                        alignment: FractionalOffset.center,
+                        child: AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            return InteractiveViewer(
+                              transformationController:
+                                  _transformationController,
+                              maxScale: 4,
+                              minScale: 1,
+                              panEnabled: _controller.mode == PaintMode.none,
+                              scaleEnabled: widget.isScalable!,
+                              onInteractionUpdate: _scaleUpdateGesture,
+                              onInteractionEnd: _scaleEndGesture,
+                              child: CustomPaint(
+                                size: imageSize,
+                                willChange: true,
+                                isComplex: true,
+                                painter: DrawImage(
+                                  image: _image,
+                                  controller: _controller,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          if (isLoading)
-            Positioned.fill(
-                child: Container(
-              color: (Theme.of(context).dialogTheme.backgroundColor ??
-                      Colors.black)
-                  .withOpacity(0.6),
-              child: Center(
-                child: widget.loadingWidget != null
-                    ? widget.loadingWidget
-                    : Text("Loading..."),
-              ),
-            )),
-        ],
+              ],
+            ),
+            if (isLoading)
+              Positioned.fill(
+                  child: Container(
+                color: (Theme.of(context).dialogTheme.backgroundColor ??
+                        Colors.black)
+                    .withOpacity(0.6),
+                child: Center(
+                  child: widget.loadingWidget != null
+                      ? widget.loadingWidget
+                      : Text("Loading..."),
+                ),
+              )),
+          ],
+        ),
       ),
     );
   }
@@ -876,9 +885,9 @@ class ImagePainterState extends State<ImagePainter> {
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildControls(double bottomPadding) {
     return Container(
-      height: MediaQuery.of(context).padding.bottom + 54,
+      height: bottomPadding + 54,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -887,6 +896,7 @@ class ImagePainterState extends State<ImagePainter> {
             label: textDelegate.noneZoom,
             isActive: _controller.mode == PaintMode.none,
             iconData: Icons.zoom_out_map,
+            bottomPadding: bottomPadding,
             action: () {
               if (widget.onPaintModeChanged != null) {
                 widget.onPaintModeChanged!(PaintMode.none);
@@ -899,6 +909,7 @@ class ImagePainterState extends State<ImagePainter> {
           BottomActionBox(
             label: textDelegate.drawing,
             isActive: _controller.mode == PaintMode.freeStyle,
+            bottomPadding: bottomPadding,
             iconData: Icons.edit,
             action: () {
               if (widget.onPaintModeChanged != null) {
@@ -922,6 +933,7 @@ class ImagePainterState extends State<ImagePainter> {
                     borderRadius: BorderRadius.circular(0),
                   ),
                   child: BottomBox(
+                    bottomPadding: bottomPadding,
                     label: textDelegate.changeColor,
                     isActive: false,
                     child: Container(
@@ -950,6 +962,7 @@ class ImagePainterState extends State<ImagePainter> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: BottomBox(
+                bottomPadding: bottomPadding,
                 label: textDelegate.changeBrushSize,
                 child: Icon(Icons.brush,
                     size: 20,
@@ -960,6 +973,7 @@ class ImagePainterState extends State<ImagePainter> {
             ),
           ),
           BottomActionBox(
+            bottomPadding: bottomPadding,
             label: textDelegate.undo,
             iconData: Icons.reply,
             action: () => _controller.undo(),
@@ -974,10 +988,12 @@ class BottomBox extends StatelessWidget {
   final Widget child;
   final String label;
   final bool isActive;
+  final double bottomPadding;
   const BottomBox({
     Key? key,
     required this.child,
     required this.label,
+    required this.bottomPadding,
     this.isActive = false,
   }) : super(key: key);
 
@@ -1003,7 +1019,7 @@ class BottomBox extends StatelessWidget {
             maxLines: 1,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: MediaQuery.of(context).padding.bottom)
+          SizedBox(height: bottomPadding)
         ],
       ),
     );
@@ -1015,13 +1031,16 @@ class BottomActionBox extends StatelessWidget {
   final String label;
   final bool isActive;
   final Function action;
-  const BottomActionBox(
-      {Key? key,
-      required this.iconData,
-      required this.label,
-      this.isActive = false,
-      required this.action})
-      : super(key: key);
+  final double bottomPadding;
+
+  const BottomActionBox({
+    Key? key,
+    required this.iconData,
+    required this.label,
+    this.isActive = false,
+    required this.action,
+    required this.bottomPadding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1032,6 +1051,7 @@ class BottomActionBox extends StatelessWidget {
           child: BottomBox(
             label: label,
             isActive: isActive,
+            bottomPadding: bottomPadding,
             child: Icon(
               iconData,
               size: 20,

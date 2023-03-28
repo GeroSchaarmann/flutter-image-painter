@@ -528,36 +528,44 @@ class ImagePainterState extends State<ImagePainter> {
             Column(
               children: [
                 Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-                    child: InteractiveViewer(
-                      maxScale: 4,
-                      minScale: 1,
-                      child: FittedBox(
-                        alignment: FractionalOffset.center,
-                        child: AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, child) {
-                            return InteractiveViewer(
-                              transformationController:
-                                  _transformationController,
-                              maxScale: 4,
-                              minScale: 1,
-                              panEnabled: _controller.mode == PaintMode.none,
-                              scaleEnabled: widget.isScalable!,
-                              onInteractionUpdate: _scaleUpdateGesture,
-                              onInteractionEnd: _scaleEndGesture,
-                              child: CustomPaint(
-                                size: imageSize,
-                                willChange: true,
-                                isComplex: true,
-                                painter: DrawImage(
-                                  image: _image,
-                                  controller: _controller,
-                                ),
-                              ),
-                            );
-                          },
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.all(Radius.circular(12.0)),
+                      child: Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        child: InteractiveViewer(
+                          maxScale: 4,
+                          minScale: 1,
+                          child: FittedBox(
+                            alignment: FractionalOffset.center,
+                            child: AnimatedBuilder(
+                              animation: _controller,
+                              builder: (context, child) {
+                                return InteractiveViewer(
+                                  transformationController:
+                                      _transformationController,
+                                  maxScale: 4,
+                                  minScale: 1,
+                                  panEnabled:
+                                      _controller.mode == PaintMode.none,
+                                  scaleEnabled: widget.isScalable!,
+                                  onInteractionUpdate: _scaleUpdateGesture,
+                                  onInteractionEnd: _scaleEndGesture,
+                                  child: CustomPaint(
+                                    size: imageSize,
+                                    willChange: true,
+                                    isComplex: true,
+                                    painter: DrawImage(
+                                      image: _image,
+                                      controller: _controller,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
